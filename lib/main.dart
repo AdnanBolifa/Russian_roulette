@@ -11,6 +11,7 @@ class RussianRouletteApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Russian Roulette',
       theme: ThemeData.dark(),
       home: const GamePage(),
