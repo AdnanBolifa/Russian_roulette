@@ -16,6 +16,7 @@ class _GamePageState extends State<GamePage> {
   List<bool> alivePlayers = [];
   bool gameStarted = false;
   bool gameOver = false;
+  String? selectedPlayer; // Track selected player for taking the shot
 
   // Initialize player controllers
   @override
@@ -40,6 +41,9 @@ class _GamePageState extends State<GamePage> {
           playerControllers.map((controller) => controller.text).toList();
       shotsFired = List.generate(playerNames.length, (_) => 0);
       alivePlayers = List.generate(playerNames.length, (_) => true);
+      selectedPlayer = playerNames.isNotEmpty
+          ? playerNames[0]
+          : null; // Set the initial selected player
       gameStarted = true;
       gameOver = false;
     });
@@ -47,7 +51,18 @@ class _GamePageState extends State<GamePage> {
 
   // Handle pulling the trigger (game logic)
   void _pullTrigger() {
-    // Your game logic here
+    if (selectedPlayer != null) {
+      // Game logic for selected player here
+      setState(() {
+        // Increment the shots fired and mark the player as dead if needed
+        int playerIndex = playerNames.indexOf(selectedPlayer!);
+        shotsFired[playerIndex]++;
+        if (shotsFired[playerIndex] >= 6) {
+          alivePlayers[playerIndex] = false;
+          gameOver = true;
+        }
+      });
+    }
   }
 
   @override
@@ -113,6 +128,35 @@ class _GamePageState extends State<GamePage> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
+                  // Player selection dropdown
+                  if (!gameOver) ...[
+                    const Text(
+                      "Select Player to Take Shot:",
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                    ),
+                    DropdownButton<String>(
+                      value: selectedPlayer,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedPlayer = newValue;
+                        });
+                      },
+                      items: playerNames
+                          .map<DropdownMenuItem<String>>((String player) {
+                        return DropdownMenuItem<String>(
+                          value: player,
+                          child: Text(player,
+                              style: const TextStyle(
+                                  fontSize: 18, color: Colors.black)),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                  // Display the game cards for each player
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
