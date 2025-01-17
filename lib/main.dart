@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'pages/game_page.dart';
+import 'pages/game_page_old.dart';
 
 void main() {
   runApp(const RussianRouletteApp());

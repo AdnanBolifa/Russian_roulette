@@ -1,60 +1,99 @@
 import 'package:flutter/material.dart';
 
-class PlayerCard extends StatelessWidget {
+class PlayerCard extends StatefulWidget {
   final String playerName;
   final int shotsFired;
   final bool isAlive;
+  final bool isSelected;
+  final VoidCallback onTap;
 
-  const PlayerCard(
-      {super.key,
-      required this.playerName,
-      required this.shotsFired,
-      required this.isAlive});
+  const PlayerCard({
+    Key? key,
+    required this.playerName,
+    required this.shotsFired,
+    required this.isAlive,
+    required this.isSelected,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  State<PlayerCard> createState() => _PlayerCardState();
+}
+
+class _PlayerCardState extends State<PlayerCard>
+    with SingleTickerProviderStateMixin {
+  bool isPressed = false;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: isAlive ? Colors.green : Colors.red,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      elevation: 5,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Add a person icon here
-          const Icon(
-            Icons.person,
-            size: 40, // Adjust size as needed
-            color: Colors.white,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            playerName,
-            style: const TextStyle(
-                fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Shots Fired: $shotsFired',
-            style: const TextStyle(fontSize: 16, color: Colors.white),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 10),
-          isAlive
-              ? const Text(
-                  'Alive',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                  textAlign: TextAlign.center,
-                )
-              : const Text(
-                  'Dead',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                  textAlign: TextAlign.center,
+    return GestureDetector(
+      onTap: widget.onTap,
+      onTapDown: (_) {
+        setState(() {
+          isPressed = true;
+        });
+      },
+      onTapUp: (_) {
+        setState(() {
+          isPressed = false;
+        });
+      },
+      onTapCancel: () {
+        setState(() {
+          isPressed = false;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        transform: Matrix4.identity()..scale(isPressed ? 0.95 : 1.0),
+        margin: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: widget.isAlive
+              ? (widget.isSelected ? Colors.green[300] : Colors.blue[200])
+              : Colors.grey[400],
+          borderRadius: BorderRadius.circular(12),
+          border: widget.isSelected
+              ? Border.all(color: Colors.green[800]!, width: 3)
+              : null,
+          boxShadow: [
+            BoxShadow(
+              color: widget.isSelected
+                  ? Colors.green.withOpacity(0.6)
+                  : Colors.black.withOpacity(0.2),
+              blurRadius: widget.isSelected ? 10 : 6,
+              offset: const Offset(2, 4),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                widget.playerName,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: widget.isAlive ? Colors.black : Colors.grey[700],
                 ),
-        ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                widget.isAlive
+                    ? 'Shots Fired: ${widget.shotsFired} / 6'
+                    : 'Eliminated',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontStyle:
+                      widget.isAlive ? FontStyle.normal : FontStyle.italic,
+                  color: widget.isAlive ? Colors.black : Colors.red[800],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
